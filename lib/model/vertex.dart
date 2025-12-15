@@ -2,6 +2,7 @@
 //
 // This source code is licensed under Apache 2.0 License.
 
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -156,4 +157,26 @@ class Vertex<I> {
     var bc = b.position - position;
     return vc.angleTo(bc);
   }
+
+  Map<String, dynamic> toJson() =>
+  {
+    "id": id as String,
+    // "position": [position.x, position.y],
+    "position": position,
+    "radius": radius,
+    "tag": tag,
+    "tags": tags,
+    "neighbors": neighbors.map<Map<String, dynamic>>((n) => n.toJsonSimple()).toList(),
+    "degree": degree,
+    // "properties": properties
+  };
+
+  Map<String, dynamic> toJsonSimple() =>
+  {
+    "id": id as String,
+    // "position": [position.x, position.y],
+    "position": position,
+    "radius": radius,
+    "degree": degree,
+  };
 }

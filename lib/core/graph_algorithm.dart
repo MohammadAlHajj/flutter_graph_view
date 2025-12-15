@@ -12,6 +12,43 @@ import 'package:flutter_graph_view/flutter_graph_view.dart';
 /// 接口：图的点位赋值算法
 ///
 abstract class GraphAlgorithm {
+  static final Map<String, GraphAlgorithm Function(Map<String,dynamic>)> _deserializationMap = {};
+  static GraphAlgorithm queryAndDeserialize(String type, Map<String,dynamic> params) {
+    if(!_deserializationMap.containsKey(type)) {
+      throw StateError("A deserialization func with this type:$type is NOT registered."
+          " Be sure to use YourGraphAlgorithm.runtimeType.toString() as the deserialization key \nCurrent Map:\n"
+          "${_deserializationMap}");
+    }
+    else {
+      return _deserializationMap[type]!(params);
+      print("$type queryAndDeserialize successful: $_deserializationMap");
+    }
+  }
+  static registerDeserialization(Type type, GraphAlgorithm Function(Map<String,dynamic>) initFunc){
+    if(_deserializationMap.containsKey(type.toString())) {
+      throw StateError("A deserialization func with this type:$type is already registered."
+          " Be sure to use YourGraphAlgorithm.runtimeType as the deserialization key. \nCurrent Map:\n"
+          "${_deserializationMap}");
+    }
+    else {
+      _deserializationMap[type.toString()] = initFunc;
+      print("$type added: $_deserializationMap");
+    }
+  }
+
+  /// In case of serialization, call this method first, then override the items
+  /// as you see fit. If you call it later, it might override your entries.
+  /// do NOT override "type" value unless you know what you are doing
+  @mustCallSuper
+  Map<String, dynamic> serialize({Map<String, dynamic> params = const {}}) =>
+      {
+        "type": runtimeType.toString(),
+        "params": params,
+        "decorators": decorators?.map((d) => d.serialize()).toList(),
+      };
+
+
+
   ///
   /// Algorithm decorate support.
   /// 定位算法的装饰器，可多个算法同时使用。
@@ -154,9 +191,30 @@ abstract class GraphAlgorithm {
     }
   }
 
+  @mustCallSuper
+  Map<String, Vector2> computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph) {
+    final forcePerVertexMap = <String, Vector2>{};
+    for (var v in vertexList) {
+      forcePerVertexMap[v["id"] as String] = Vector2.zero();
+    }
+    if (decorators != null) {
+      for (var decorator in decorators!) {
+        // if (!decorator.needContinueRaw(vertex)) return;
+        final perDecoratorForceMap = decorator.computeRaw(vertexList, graph);
+        for (final key in perDecoratorForceMap.keys){
+          forcePerVertexMap[key] = forcePerVertexMap[key]! + perDecoratorForceMap[key]!;
+        }
+      }
+    }
+    return forcePerVertexMap;
+  }
+
   bool needContinue(Vertex v) {
     return true;
   }
+
+  bool needContinueRaw(Map vertex) => vertex["needContinue"] as bool? ?? true;
+
 
   /// Called when the graph is loaded.
   @mustCallSuper

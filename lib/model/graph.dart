@@ -126,4 +126,10 @@ class Graph<ID> {
   ValueNotifier get scale => options!.scale;
   get refreshData => options?.refreshData;
   get mergeGraph => options?.mergeGraph;
+
+  Map<String, dynamic> toJson() =>
+    {
+      "vertexes": vertexes.map((v)=> v.toJson()).toList(),
+      // "algorithm": algorithm?.serialize(),
+    };
 }

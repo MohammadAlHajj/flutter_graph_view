@@ -15,7 +15,8 @@ class ForceDecorator extends GraphAlgorithm {
   ForceDecorator({
     this.sameSrcAndDstFactor,
     this.sameTagsFactor = 1,
-  }) : super(decorators: null);
+    super.decorators
+  });
 
   @override
   void onLoad(Vertex v) {

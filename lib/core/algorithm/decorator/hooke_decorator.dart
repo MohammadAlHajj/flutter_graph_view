@@ -15,6 +15,26 @@ class HookeDecorator extends ForceDecorator {
   double k;
   double Function(double length, int degree)? degreeFactor;
 
+  /// register type deserializer in GraphAlgorithm
+  static final _ =  GraphAlgorithm.registerDeserialization(HookeDecorator, deserialize);
+  static HookeDecorator deserialize(Map params) =>
+      HookeDecorator(
+        length: double.parse(params["length"] as String),
+        k: double.parse(params["k"] as String),
+        sameTagsFactor: double.parse(params["sameTagsFactor"] as String),
+        // degreeFactor: params["degreeFactor"] as String),
+      );
+
+  @override
+  Map<String, dynamic> serialize({Map<String, dynamic> params = const {}}) {
+    return super.serialize(params: {
+      "k": k.toString(),
+      "length": length.toString(),
+      "sameTagsFactor": sameTagsFactor.toString(),
+    });
+  }
+
+
   @override
   Widget Function()? get verticalOverlay =>
       handleOverlay != null ? () => handleOverlay!(this) : null;
@@ -27,13 +47,26 @@ class HookeDecorator extends ForceDecorator {
     super.sameTagsFactor = 1,
     this.handleOverlay,
     this.degreeFactor,
-  });
+  }){
+    var _ = HookeDecorator._;
+    // print("Called: HookeDecorator constructor");
+
+  }
 
   Vector2 hooke(Vertex s, Vertex d, Graph graph) {
     var len = degreeFactor?.call(length, d.neighborEdges.length) ?? length;
     var delta = s.position - d.position;
     var distance = delta.length;
     var force = -(distance - len - log(s.degree + d.degree)) * k;
+    return delta * force;
+  }
+
+  Vector2 hookeRaw(Map<String, dynamic> s, Map<String, dynamic> d, Map<String, dynamic> graph) {
+    // var len = degreeFactor?.call(length, d.neighborEdges.length) ?? length;
+    var len = length;
+    var delta = s["position"] - d["position"];
+    var distance = delta.length;
+    var force = -(distance - len - log(s["degree"] + d["degree"])) * k;
     return delta * force;
   }
 
@@ -46,5 +79,26 @@ class HookeDecorator extends ForceDecorator {
         setForceMap(v, n, force);
       }
     }
+  }
+
+  @override
+  Map<String, Vector2> computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph) {
+    final forcePerVertexMap = <String, Vector2>{};
+    for (final v in vertexList) {
+      forcePerVertexMap[v["id"] as String] = Vector2.zero();
+    }
+
+    for (final v in vertexList) {
+      for (var n in v["neighbors"]) {
+        if (v["position"] != Vector2.zero() && n["position"] != Vector2.zero()) {
+          forcePerVertexMap[v["id"] as String] = hookeRaw(v, n, graph);
+        }
+      }
+    }
+    final childForces = super.computeRaw(vertexList, graph);
+    for (final key in childForces.keys){
+      forcePerVertexMap[key] = forcePerVertexMap[key]! + childForces[key]!;
+    }
+    return forcePerVertexMap;
   }
 }

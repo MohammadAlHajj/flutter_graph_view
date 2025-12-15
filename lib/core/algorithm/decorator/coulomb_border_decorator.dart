@@ -9,8 +9,16 @@ import 'package:flutter_graph_view/flutter_graph_view.dart';
 /// 子图中，度最多的节点间相互排斥的装饰器（库仑定律）
 @Deprecated('An experimental method')
 class CoulombBorderDecorator extends ForceDecorator {
+
+  /// register type deserializer in GraphAlgorithm
+  static final _ =  GraphAlgorithm.registerDeserialization(CoulombBorderDecorator, deserialize);
+  static CoulombBorderDecorator deserialize(Map params) =>
+    CoulombBorderDecorator(k: double.parse(params["k"] as String));
+
   double k;
   CoulombBorderDecorator({this.k = 1});
+
+
 
   @override
   // ignore: must_call_super

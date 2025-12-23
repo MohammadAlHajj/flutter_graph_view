@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_graph_view/flutter_graph_view.dart';
 
+
 ///
 /// Interface: point assignment algorithm of graph.
 /// 接口：图的点位赋值算法
@@ -192,17 +193,19 @@ abstract class GraphAlgorithm {
   }
 
   @mustCallSuper
-  Map<String, Vector2> computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph) {
-    final forcePerVertexMap = <String, Vector2>{};
-    for (var v in vertexList) {
-      forcePerVertexMap[v["id"] as String] = Vector2.zero();
-    }
+  ComputeRes computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph) {
+    final forcePerVertexMap = ComputeRes();
+    // for (var v in vertexList) {
+    //   forcePerVertexMap[v["id"] as String] = Vector2.zero();
+    // }
     if (decorators != null) {
       for (var decorator in decorators!) {
         // if (!decorator.needContinueRaw(vertex)) return;
         final perDecoratorForceMap = decorator.computeRaw(vertexList, graph);
-        for (final key in perDecoratorForceMap.keys){
-          forcePerVertexMap[key] = forcePerVertexMap[key]! + perDecoratorForceMap[key]!;
+        for (final keys in perDecoratorForceMap.keys){
+          forcePerVertexMap[keys] = forcePerVertexMap.containsKey(keys)
+              ? forcePerVertexMap[keys] + perDecoratorForceMap[keys]!
+              : perDecoratorForceMap[keys]!;
         }
       }
     }
@@ -241,3 +244,35 @@ abstract class GraphAlgorithm {
 
   void onZoomEdge(Edge edge, Vector2 pointLocation, double delta) {}
 }
+
+// class ComputeKey{
+//   String source,target;
+//
+//   ComputeKey({required this.source,required this.target});
+// }
+
+// class ComputeVal{
+//   Vector2? force;
+//   Vector2? position;
+//   bool overridePos;
+//
+//   ComputeVal({this.force, this.position, this.overridePos = false});
+//
+//   ComputeVal operator +(ComputeVal? other) {
+//     if(other == null) {
+//       return this;
+//     }
+//     if(other.overridePos){
+//       return other;
+//     }
+//     if(overridePos){
+//       return this;
+//     }
+//     return ComputeVal(
+//       force: force + other.force,
+//       position: position + other.position
+//     );
+//   }
+// }
+
+

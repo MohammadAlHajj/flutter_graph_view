@@ -54,11 +54,8 @@ class CoulombDecorator extends ForceDecorator {
   }
 
   @override
-  Map<String, Vector2> computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph) {
-    final forcePerVertexMap = <String, Vector2>{};
-    for (final v in vertexList) {
-      forcePerVertexMap[v["id"] as String] = Vector2.zero();
-    }
+  ComputeRes computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph) {
+    final perVertexCalcMap = ComputeRes();
 
     for (final v in vertexList) {
       for (var gv in graph["vertexes"]) {
@@ -74,15 +71,17 @@ class CoulombDecorator extends ForceDecorator {
           var distance = delta.length;
           var force = k * v["radius"] * gv["radius"] / max((distance * distance), 1);
 
-          forcePerVertexMap[v["id"] as String] = delta * force;
+          perVertexCalcMap[(v["id"], gv["id"])] = delta * force;
         }
       }
     }
 
     final childForces = super.computeRaw(vertexList, graph);
-    for (final key in childForces.keys){
-      forcePerVertexMap[key] = forcePerVertexMap[key]! + childForces[key]!;
+    for (final keys in perVertexCalcMap.keys){
+      childForces[keys] = childForces.containsKey(keys)
+          ? childForces[keys] + perVertexCalcMap[keys]!
+          : perVertexCalcMap[keys]!;
     }
-    return forcePerVertexMap;
+    return childForces;
   }
 }

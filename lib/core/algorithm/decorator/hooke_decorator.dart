@@ -82,23 +82,26 @@ class HookeDecorator extends ForceDecorator {
   }
 
   @override
-  Map<String, Vector2> computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph) {
-    final forcePerVertexMap = <String, Vector2>{};
-    for (final v in vertexList) {
-      forcePerVertexMap[v["id"] as String] = Vector2.zero();
-    }
+  ComputeRes computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph) {
+    final perVertexCalcMap = ComputeRes();
+    // for (final v in vertexList) {
+    //   perVertexCalcMap[v["id"] as String] = Vector2.zero();
+    // }
 
     for (final v in vertexList) {
       for (var n in v["neighbors"]) {
         if (v["position"] != Vector2.zero() && n["position"] != Vector2.zero()) {
-          forcePerVertexMap[v["id"] as String] = hookeRaw(v, n, graph);
+          perVertexCalcMap[(v["id"], n["id"])]
+            = hookeRaw(v, n, graph);
         }
       }
     }
     final childForces = super.computeRaw(vertexList, graph);
-    for (final key in childForces.keys){
-      forcePerVertexMap[key] = forcePerVertexMap[key]! + childForces[key]!;
+    for (final keys in perVertexCalcMap.keys){
+      childForces[keys] = childForces.containsKey(keys)
+        ? childForces[keys] + perVertexCalcMap[keys]!
+        : perVertexCalcMap[keys]!;
     }
-    return forcePerVertexMap;
+    return perVertexCalcMap;
   }
 }

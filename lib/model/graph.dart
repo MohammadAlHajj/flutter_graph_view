@@ -19,6 +19,10 @@ class Graph<ID> {
   /// 图中所有的节点数据
   final List<Vertex<ID>> vertexes = [];
 
+  /// All the vertexes' data in graph.
+  Map<ID, Vertex<ID>> get vertexByIdMap =>
+      {for (var vertex in vertexes) vertex.id: vertex};
+
   /// All the edges' data in graph.
   /// 图中所有的关系数据
   Set<Edge> edges = {};
@@ -129,7 +133,7 @@ class Graph<ID> {
 
   Map<String, dynamic> toJson() =>
     {
-      "vertexes": vertexes.map((v)=> v.toJson()).toList(),
+      "vertexes": { for (var v in vertexes) v.id as String: v.toJson() },
       // "algorithm": algorithm?.serialize(),
     };
 }

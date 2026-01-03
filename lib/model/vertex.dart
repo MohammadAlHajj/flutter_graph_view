@@ -166,17 +166,18 @@ class Vertex<I> {
     "radius": radius,
     "tag": tag,
     "tags": tags,
-    "neighbors": neighbors.map<Map<String, dynamic>>((n) => n.toJsonSimple()).toList(),
+    // "neighbors": neighbors.map<Map<String, dynamic>>((n) => n.toJsonSimple()).toList(),
+    "neighbors": neighbors.map((n) => n.id as String).toList(),
     "degree": degree,
     // "properties": properties
   };
 
-  Map<String, dynamic> toJsonSimple() =>
-  {
-    "id": id as String,
-    // "position": [position.x, position.y],
-    "position": position,
-    "radius": radius,
-    "degree": degree,
-  };
+  // Map<String, dynamic> toJsonSimple() =>
+  // {
+  //   "id": id as String,
+  //   // "position": [position.x, position.y],
+  //   "position": position,
+  //   "radius": radius,
+  //   "degree": degree,
+  // };
 }

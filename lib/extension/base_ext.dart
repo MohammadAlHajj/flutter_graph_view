@@ -11,7 +11,7 @@ extension SizeExt on ui.Size {
   ui.Offset toOffset() => ui.Offset(width, height);
 }
 
-extension Vector2Ext on Vector2 {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      extension Vector2Ext on Vector2 {
   ui.Offset toOffset() => ui.Offset(x, y);
 
   Vector2 operator +(Vector2? other) =>
@@ -23,7 +23,7 @@ extension OffsetExt on ui.Offset {
   Vector2 toVector2() => Vector2(dx, dy);
 }
 
-extension Vector2ExtNullible on Vector2? {
+extension Vector2ExtNullable on Vector2? {
   Vector2 operator +(Vector2? other) =>
     this == null
         ? (other ?? Vector2.zero())
@@ -31,7 +31,15 @@ extension Vector2ExtNullible on Vector2? {
     ;
 }
 
-typedef ComputeRes = Map<(String,String), Vector2>;
+extension ForceMap<T> on Map<T,Vector2>{
+  void addOrSet(T key, Vector2 val) {
+    this[key] = containsKey(key)
+        ? this[key]! + val
+        : val;
+  }
+}
+
+typedef ComputeRes = Map<String, Vector2>;
 // ///
 // /// $1: force
 // /// $2: position

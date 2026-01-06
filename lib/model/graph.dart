@@ -132,7 +132,7 @@ class Graph<ID> {
   get refreshData => options?.refreshData;
   get mergeGraph => options?.mergeGraph;
 
-  /// 
+  ///
   Map<String, dynamic> serialize() =>
     {
       "vertexes": { for (var v in vertexes) v.id as String: v.serialize() },

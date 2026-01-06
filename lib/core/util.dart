@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter_graph_view/flutter_graph_view.dart';
+import 'package:isolate_manager/isolate_manager.dart';
 
 /// Common tools.
 ///
@@ -22,4 +23,12 @@ class Util {
   static Offset? toOffsetByVector2(Vector2? v) {
     return v == null ? null : Offset(v.x, v.y);
   }
+}
+
+abstract class ParallelizableDecorator{
+  ComputeRes computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph);
+  Map<String,dynamic> serialize({Map<String, dynamic> params = const {}});
+  String get isolateFuncWorkerName;
+  int get isolateCount;
+  void Function(dynamic params) get isolateAttachFunc;
 }

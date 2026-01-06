@@ -9,7 +9,6 @@ import 'package:flutter_graph_view/core/algorithm/decorator/parallelizable_decor
 import 'package:flutter_graph_view/flutter_graph_view.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 
-import '../../util.dart';
 
 /// Construct a decorative device with spring force between connected nodes.
 ///

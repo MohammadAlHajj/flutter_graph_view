@@ -10,11 +10,6 @@ import 'package:flutter_graph_view/flutter_graph_view.dart';
 @Deprecated('An experimental method')
 class CoulombBorderDecorator extends ForceDecorator {
 
-  /// register type deserializer in GraphAlgorithm
-  static final _ =  GraphAlgorithm.registerDeserialization(CoulombBorderDecorator, deserialize);
-  static CoulombBorderDecorator deserialize(Map params) =>
-    CoulombBorderDecorator(k: double.parse(params["k"] as String));
-
   double k;
   CoulombBorderDecorator({this.k = 1});
 

@@ -24,6 +24,8 @@ class MapConvertor extends DataConvertor<Map, Map> {
     vertex.tag = v['tag'];
     vertex.tags = v['tags'];
     vertex.data = v['data'];
+    vertex.force = Vector2.zero();
+    vertex.velocity = Vector2.zero();
     return vertex;
   }
 

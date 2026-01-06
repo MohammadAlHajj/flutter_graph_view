@@ -7,11 +7,26 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_graph_view/flutter_graph_view.dart';
 
+
 ///
 /// Interface: point assignment algorithm of graph.
 /// 接口：图的点位赋值算法
 ///
 abstract class GraphAlgorithm {
+
+  /// In case of serialization, call this method first, then override the items
+  /// as you see fit. If you call it later, it might override your entries.
+  /// do NOT override "type" value unless you know what you are doing
+  @mustCallSuper
+  Map<String, dynamic> serialize({Map<String, dynamic> params = const {}}) =>
+      {
+        "type": runtimeType.toString(),
+        "params": params,
+        "decorators": decorators?.map((d) => d.serialize()).toList(),
+      };
+
+
+
   ///
   /// Algorithm decorate support.
   /// 定位算法的装饰器，可多个算法同时使用。
@@ -158,6 +173,9 @@ abstract class GraphAlgorithm {
     return true;
   }
 
+
+  /// todo: rename to something that makes more descriptive sense: onGraphLoad.
+  /// todo: currently it falsely means: onDecoratorLoad.
   /// Called when the graph is loaded.
   @mustCallSuper
   void onLoad(Vertex v) {

@@ -2,10 +2,13 @@
 //
 // This source code is licensed under Apache 2.0 License.
 
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_graph_view/flutter_graph_view.dart';
+
+export 'vertex_ext.dart';
 
 ///
 /// Data model of vertex component.
@@ -126,6 +129,9 @@ class Vertex<I> {
 
   Graph? g;
 
+  /// todo rename the getter to: isLocalCenter.
+  /// Get if the current vertex is the local center. This means that it has more
+  /// degrees than all its neighbors.
   bool get isCenter => neighbors.fold(
         true,
         (previousValue, element) =>
@@ -156,4 +162,27 @@ class Vertex<I> {
     var bc = b.position - position;
     return vc.angleTo(bc);
   }
+
+  Map<String, dynamic> serialize() =>
+  {
+    "id": id as String,
+    // "position": [position.x, position.y],
+    "position": position,
+    "radius": radius,
+    "tag": tag,
+    "tags": tags,
+    // "neighbors": neighbors.map<Map<String, dynamic>>((n) => n.toJsonSimple()).toList(),
+    "neighbors": neighbors.map((n) => n.id as String).toList(),
+    "degree": degree,
+    // "properties": properties
+  };
+
+  // Map<String, dynamic> toJsonSimple() =>
+  // {
+  //   "id": id as String,
+  //   // "position": [position.x, position.y],
+  //   "position": position,
+  //   "radius": radius,
+  //   "degree": degree,
+  // };
 }

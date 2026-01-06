@@ -11,10 +11,34 @@ extension SizeExt on ui.Size {
   ui.Offset toOffset() => ui.Offset(width, height);
 }
 
-extension Vector2Ext on Vector2 {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      extension Vector2Ext on Vector2 {
   ui.Offset toOffset() => ui.Offset(x, y);
+
+  Vector2 operator +(Vector2? other) =>
+      other == null ? this : this + other
+  ;
 }
 
 extension OffsetExt on ui.Offset {
   Vector2 toVector2() => Vector2(dx, dy);
 }
+
+extension Vector2ExtNullable on Vector2? {
+  Vector2 operator +(Vector2? other) =>
+    this == null
+        ? (other ?? Vector2.zero())
+        : (other == null ? this! : this! + other)
+    ;
+}
+
+extension ForceMap<T> on Map<T,Vector2>{
+  void addOrSet(T key, Vector2 val) {
+    this[key] = containsKey(key)
+        ? this[key]! + val
+        : val;
+  }
+}
+
+/// Used to represent a result of a Raw computation. the ke is a Vertex ID
+/// the value is a Vector2 representing a force, position velocity, ...
+typedef ComputeRes = Map<String, Vector2>;

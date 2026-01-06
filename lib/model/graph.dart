@@ -15,9 +15,14 @@ class Graph<ID> {
   DataConvertor? convertor;
   ValueNotifier<Size> get size => options!.size;
 
-  /// All the vertexes' data in graph.
+  /// All the vertexes' data in graph in List form.
   /// 图中所有的节点数据
   final List<Vertex<ID>> vertexes = [];
+
+  /// All the vertexes' data in Map form with the vertex id as the key. This is very
+  /// useful if you want to get O(1) search to get a vertex by id
+  Map<ID, Vertex<ID>> get vertexByIdMap =>
+      {for (var vertex in vertexes) vertex.id: vertex};
 
   /// All the edges' data in graph.
   /// 图中所有的关系数据
@@ -126,4 +131,11 @@ class Graph<ID> {
   ValueNotifier get scale => options!.scale;
   get refreshData => options?.refreshData;
   get mergeGraph => options?.mergeGraph;
+
+  /// 
+  Map<String, dynamic> serialize() =>
+    {
+      "vertexes": { for (var v in vertexes) v.id as String: v.serialize() },
+      // "algorithm": algorithm?.serialize(),
+    };
 }

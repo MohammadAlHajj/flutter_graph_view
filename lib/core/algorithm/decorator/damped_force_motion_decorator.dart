@@ -152,10 +152,10 @@ class DampedForceMotionDecorator extends ForceMotionDecorator {
       if (logMaxMoveThisCycle && _stableCycleCount <= stableCyclesThreshold) {
         print("----------Max move this graph cycle"
             "${
-            _maxMove < stopTolerance
+              _maxMove < stopTolerance
                 ? " (stable $_stableCycleCount/$stableCyclesThreshold)"
                 : ""
-        }"
+            }"
             ": $_maxMove");
       }
     }

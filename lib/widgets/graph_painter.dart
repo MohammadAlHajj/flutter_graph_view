@@ -4,13 +4,12 @@
 
 import 'dart:typed_data' show Float64List;
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart' show ValueNotifier;
+import 'package:flutter/material.dart';
 import 'package:flutter_graph_view/flutter_graph_view.dart';
 
 class GraphPainter extends CustomPainter {
   final Graph graph;
-  GraphPainter(this.graph);
+  GraphPainter(this.graph, Listenable? repaint): super(repaint: repaint);
 
   List<Vertex> get vertexes => graph.vertexes;
   List<Edge> get edges => graph.edges.toList();

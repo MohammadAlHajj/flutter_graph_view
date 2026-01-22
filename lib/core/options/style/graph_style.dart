@@ -97,6 +97,9 @@ class GraphStyle {
   /// @zh: 顶点悬停时，非激活点边的透明度
   double hoverOpacity = 0.3;
 
+  /// @en: the not-weak edge opacity. see [EdgeShape.isWeaken].
+  double edgeStrongOpacity = 1.0;
+
   /// @en: the text style of vertex.
   /// now is only supports:
   /// - `fontSize`

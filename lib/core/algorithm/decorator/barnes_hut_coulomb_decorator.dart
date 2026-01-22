@@ -17,7 +17,7 @@ import 'package:isolate_manager/isolate_manager.dart';
 /// influence of distant vertices. This provides a significant performance
 /// improvement at the cost of reduced accuracy.
 ///
-/// Please note that this decorator has a lot of overhear before it starts. This
+/// Please note that this decorator has a lot of overhead before it starts. This
 /// will affect at which Graph size this decorator becomes better than
 /// [CoulombDecorator]. Try out the demo to check for yourself. be sure to
 /// enable logging flag [ParallelizationDecorator.logCycleDuration] if you are

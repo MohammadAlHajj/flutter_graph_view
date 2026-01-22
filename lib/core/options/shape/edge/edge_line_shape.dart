@@ -55,10 +55,12 @@ class EdgeLineShape extends EdgeShape {
   void vertexDifferent(Edge edge, ui.Canvas canvas, ui.Paint paint) {
     var endPoint = Offset(len(edge), paint.strokeWidth);
 
-    var distance = Util.distance(
-      Vector2(0, 0),
-      Vector2(endPoint.dx, 0),
-    );
+    // var distance = Util.distance(
+    //   Vector2(0, 0),
+    //   Vector2(endPoint.dx, 0),
+    // );
+
+    var distance = -endPoint.dx;
 
     var edgesBetweenTwoVertex =
         edge.g?.edgesFromTwoVertex(edge.start, edge.end) ?? [];
@@ -121,39 +123,31 @@ class EdgeLineShape extends EdgeShape {
     paint.style = PaintingStyle.stroke;
     var startPoint = Offset.zero;
     var endPoint = Offset(len(edge), paint.strokeWidth);
-    var hoverOpacity = edge.g?.options?.graphStyle.hoverOpacity ?? .5;
-
+    var strongOpacity = edge.g?.options?.graphStyle.edgeStrongOpacity ?? 1;
+    var hoverOpacity = strongOpacity *
+        (edge.g?.options?.graphStyle.hoverOpacity ?? .5);
+    // var hoverOpacity = hoverOpacityMultiplier
+    //     ?? edge.g?.options?.graphStyle.hoverOpacity
+    //     ?? 0.5;
     if (edge.solid && edge.g?.options?.edgeSolidSetter != null) {
       return edge.g!.options!.edgeSolidSetter!(edge, paint);
     }
 
-    if (isWeaken(edge) && !edge.solid) {
-      paint.shader = ui.Gradient.linear(
-        startPoint,
-        endPoint,
-        List.generate(
-          2,
-          (index) => [
-            (edge.start.colors.lastOrNull ?? Colors.white)
-                .withValues(alpha: hoverOpacity),
-            (edge.end?.colors.lastOrNull ?? Colors.white)
-                .withValues(alpha: hoverOpacity)
-          ][index],
-        ),
-      );
-    } else {
-      paint.shader = ui.Gradient.linear(
-        startPoint,
-        endPoint,
-        List.generate(
-          2,
-          (index) => [
-            edge.start.colors.lastOrNull ?? Colors.white,
-            (edge.end?.colors.lastOrNull ?? Colors.white)
-          ][index],
-        ),
-      );
-    }
+    final generated = edge.edgeRender.generateColorsIfNeeded(strongOpacity, hoverOpacity);
+
+    var currentIsWeaken = isWeaken(edge);
+    // if(generated && edge.edgeRender.lastIsWeakened != currentIsWeaken){
+        paint.shader = ui.Gradient.linear(
+          startPoint,
+          endPoint,
+          (currentIsWeaken && !edge.solid)
+              ? edge.edgeRender.lineShapeColorsWeaken
+              : edge.edgeRender.lineShapeColors
+        );
+
+
+    // }
+    edge.edgeRender.lastIsWeakened = currentIsWeaken;
     return paint;
   }
 

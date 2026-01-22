@@ -14,23 +14,41 @@ class EdgeTextRendererImpl extends EdgeTextRenderer {
   EdgeTextRendererImpl({super.shape});
   @override
   void render(Edge edge, ui.Canvas canvas, ui.Paint paint) {
-    canvas.save();
-    canvas.transform(edge.edgeCenter());
+
     var zoom = edge.zoom;
-    TextStyle? edgeTextStyle =
-        edge.g?.options?.graphStyle.edgeTextStyleGetter?.call(edge, shape);
-    var text = edge.g?.options?.edgeTextGetter.call(edge) ?? '';
+    TextStyle? textStyle;
+    ui.Paragraph? paragraph;
 
-    TextStyle textStyle = super.textStyleGetter(
-      edgeTextStyle,
-      paint,
-      scale: 1 / zoom,
-      isLoop: edge.isLoop,
-      textLen: text.length,
-      distance: edge.length,
-    );
+    if(edge.edgeRender.lastTextZoom != zoom) {
+      edge.edgeRender.lastTextZoom = zoom;
+      edge.edgeRender.needsUpdate = true;
+    }
 
-    final paragraph = super.paragraph(textStyle, paint, text);
+    if(edge.edgeRender.needsUpdate){
+      textStyle = edge.g?.options?.graphStyle.edgeTextStyleGetter
+          ?.call(edge, shape);
+      var text = edge.g?.options?.edgeTextGetter.call(edge) ?? '';
+
+      textStyle = super.textStyleGetter(
+        textStyle,
+        paint,
+        scale: 1 / zoom,
+        isLoop: edge.isLoop,
+        textLen: text.length,
+        distance: edge.length,
+      );
+
+      paragraph = super.paragraph(textStyle, paint, text);
+
+      edge.edgeRender.needsUpdate = false;
+
+    }
+    else {
+      paragraph = edge.edgeRender.paragraph!;
+      textStyle = edge.edgeRender.textStyle!;
+    }
+
+
 
     var tw = paragraph.width;
     ui.Offset offset = edge.isLoop
@@ -38,6 +56,9 @@ class EdgeTextRendererImpl extends EdgeTextRenderer {
         : ui.Offset(-tw / 2, -paragraph.height / 2);
 
     /// 6.绘制
+    canvas.save();
+    canvas.transform(edge.edgeCenter());
+
     canvas.drawParagraph(paragraph, offset);
     canvas.restore();
   }

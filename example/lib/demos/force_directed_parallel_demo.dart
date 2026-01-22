@@ -154,6 +154,7 @@ class ForceDirectedParallelDemo extends StatelessWidget {
                     ..panelDelay = const Duration(milliseconds: 500)
                     ..graphStyle = (GraphStyle()
                       ..hoverOpacity = 0.5
+                      ..edgeStrongOpacity = 0.5
                       // tagColor is prior to tagColorByIndex. use vertex.tags to get color
                       ..tagColor = {'tag8': Colors.orangeAccent.shade200}
                       ..tagColorByIndex = [
@@ -170,9 +171,10 @@ class ForceDirectedParallelDemo extends StatelessWidget {
                       ])
                     ..edgePanelBuilder = edgePanelBuilder
                     ..vertexPanelBuilder = vertexPanelBuilder
-                    ..edgeShape = EdgeLineShapeVariableOpacity (
-                      normalOpacity: 0.3,
-                      hoverOpacityMultiplier: 0.1,
+                    ..edgeShape = EdgeLineShape (
+                    // ..edgeShape = EdgeLineShapeVariableOpacity (
+                    //   normalOpacity: 0.3,
+                    //   hoverOpacityMultiplier: 0.1,
                       decorators: [
                         // ZoomAwareEdgePaintDecorator(),
                         // SafeArrowEdgeDecorator()

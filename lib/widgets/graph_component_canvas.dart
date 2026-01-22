@@ -36,6 +36,8 @@ class _GraphComponentCanvasState extends State<GraphComponentCanvas>
   dynamic get data => widget.data;
   DataConvertor get convertor => widget.convertor;
   Options get options => widget.options;
+  GraphPainter? graphPainter;
+
 
   ValueNotifier<double> get scale => options.scale;
   ValueNotifier<Offset> get offset => options.offset;
@@ -52,7 +54,11 @@ class _GraphComponentCanvasState extends State<GraphComponentCanvas>
 
   void run() {
     options.run();
-    if (mounted) setState(() {});
+    update();
+    if (mounted) {
+      setState(() {
+      });
+    }
   }
 
   @override
@@ -76,6 +82,8 @@ class _GraphComponentCanvasState extends State<GraphComponentCanvas>
     options.pause.addListener(playOrPause);
     offset.addListener(update);
     scale.addListener(update);
+
+    graphPainter = GraphPainter(graph, timestamp);
   }
 
   @override
@@ -101,7 +109,7 @@ class _GraphComponentCanvasState extends State<GraphComponentCanvas>
                 child: Transform.scale(
                   scale: scale.value,
                   child: CustomPaint(
-                    painter: GraphPainter(graph),
+                    painter: graphPainter,
                     size: Size.infinite,
                   ),
                 ),

@@ -23,8 +23,8 @@ class EdgeLineShapeVariableOpacity extends EdgeLineShape {
   @override
   Paint getPaint(Edge edge) {
     var paint = Paint();
-    // paint.strokeWidth = (edge.isHovered ? 4 : 1.2) / edge.zoom;
-    paint.strokeWidth = 1.2 / edge.zoom;
+    paint.strokeWidth = (edge.isHovered ? 4 : 1.2) / edge.zoom;
+    // paint.strokeWidth = 1.2 / edge.zoom;
     // paint.strokeWidth = edge.zoom;
     paint.style = PaintingStyle.stroke;
     var startPoint = Offset.zero;

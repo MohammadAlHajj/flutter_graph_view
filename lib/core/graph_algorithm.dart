@@ -169,6 +169,9 @@ abstract class GraphAlgorithm {
     return true;
   }
 
+
+  /// todo: rename to something that makes more descriptive sense: onGraphLoad.
+  /// todo: currently it falsely means: onDecoratorLoad.
   /// Called when the graph is loaded.
   @mustCallSuper
   void onLoad(Vertex v) {

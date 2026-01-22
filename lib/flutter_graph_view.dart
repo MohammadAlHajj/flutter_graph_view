@@ -49,6 +49,7 @@ export 'core/algorithm/decorator/coulomb_center_decorator.dart';
 export 'core/algorithm/decorator/coulomb_border_decorator.dart';
 export 'core/algorithm/decorator/time_counter_decorator.dart';
 export 'core/algorithm/decorator/persistence_decorator.dart';
+export 'core/algorithm/decorator/pin_to_center_decorator.dart';
 export 'core/algorithm/decorator/pin_decorator.dart';
 export 'core/algorithm/decorator/pause_decorator.dart';
 export 'core/algorithm/decorator/graph_route_decorator.dart';

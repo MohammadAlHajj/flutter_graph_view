@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_graph_view/flutter_graph_view.dart';
+import 'package:flutter_graph_view/model/vertex_render.dart';
 
 export 'vertex_ext.dart';
 
@@ -14,6 +15,8 @@ export 'vertex_ext.dart';
 /// 节点组件的数据模型
 ///
 class Vertex<I> {
+  VertexRender vertexRender = VertexRender();
+
   /// The primary key of vertex.
   /// 节点主键
   late I id;
@@ -126,6 +129,9 @@ class Vertex<I> {
 
   Graph? g;
 
+  /// todo rename the getter to: isLocalCenter.
+  /// Get if the current vertex is the local center. This means that it has more
+  /// degrees than all its neighbors.
   bool get isCenter => neighbors.fold(
         true,
         (previousValue, element) =>

@@ -2,11 +2,11 @@
 //
 // This source code is licensed under Apache 2.0 License.
 
-import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_graph_view/flutter_graph_view.dart';
+import 'package:flutter_graph_view/model/vertex_render.dart';
 
 export 'vertex_ext.dart';
 
@@ -15,6 +15,8 @@ export 'vertex_ext.dart';
 /// 节点组件的数据模型
 ///
 class Vertex<I> {
+  VertexRender vertexRender = VertexRender();
+
   /// The primary key of vertex.
   /// 节点主键
   late I id;
@@ -22,6 +24,9 @@ class Vertex<I> {
   /// The first tag of vertex.
   /// 节点首个标签
   late String tag;
+
+  bool solid = false; // the color
+  double radiusScale = 1.0;
 
   /// All the tags of vertex.
   /// 节点所有标签
@@ -92,7 +97,7 @@ class Vertex<I> {
 
   /// The radius of this vertex, that which assigment by StyleConfiguration.
   /// 节点的默认半径，用于被样式选项设置器进行修改以更新图形
-  double get radius => (math.log(degree * 10 + 1)) + _radius;
+  double get radius => (math.log(degree * 10 + 1)) + _radius * radiusScale;
 
   /// The size of this vertex
   ///
@@ -166,23 +171,13 @@ class Vertex<I> {
   Map<String, dynamic> serialize() =>
   {
     "id": id as String,
-    // "position": [position.x, position.y],
     "position": position,
     "radius": radius,
     "tag": tag,
     "tags": tags,
-    // "neighbors": neighbors.map<Map<String, dynamic>>((n) => n.toJsonSimple()).toList(),
     "neighbors": neighbors.map((n) => n.id as String).toList(),
     "degree": degree,
+    // TODO: how do we safely pass in properties
     // "properties": properties
   };
-
-  // Map<String, dynamic> toJsonSimple() =>
-  // {
-  //   "id": id as String,
-  //   // "position": [position.x, position.y],
-  //   "position": position,
-  //   "radius": radius,
-  //   "degree": degree,
-  // };
 }

@@ -20,7 +20,7 @@ class PersistenceDemo extends StatefulWidget {
 }
 
 class _PersistenceDemoState extends State<PersistenceDemo> {
-  saveVertex(Vertex v) {
+  void saveVertex(Vertex v) {
     vertexStorage[v.id as String] = v;
   }
 
@@ -93,6 +93,20 @@ class _PersistenceDemoState extends State<PersistenceDemo> {
       ),
       convertor: MapConvertor(),
       options: Options()
+        ..vertexSolidSetter = ((vertex, paint) {
+          paint.color = vertex.colors.first;
+          return paint;
+        })
+        ..edgeSolidSetter = ((edge, paint) {
+          paint.color = edge.start.colors.lastOrNull ?? Colors.white;
+          return paint;
+        })
+        ..onVertexTapUp = ((vertex, event) {
+          vertex.solid = true;
+          for (var e in vertex.neighborEdges) {
+            e.solid = true;
+          }
+        })
         ..enableHit = false
         ..panelDelay = const Duration(milliseconds: 500)
         ..graphStyle = (GraphStyle()

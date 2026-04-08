@@ -3,7 +3,11 @@
 // This source code is licensed under Apache 2.0 License.
 
 import 'package:flutter/gestures.dart'
-    show PointerHoverEvent, PointerScrollEvent, PointerSignalEvent;
+    show
+        PointerHoverEvent,
+        PointerScrollEvent,
+        PointerSignalEvent,
+        PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_graph_view/flutter_graph_view.dart';
 
@@ -29,9 +33,17 @@ typedef BackgroundBuilder = Widget Function(BuildContext context);
 /// @en: The getter of the vertex text style.
 ///
 /// @zh: 顶点文字样式获取器
-typedef VertexTextStyleGetter = TextStyle? Function(
+typedef VertexTextStyleGetter = TextStyle Function(
   Vertex vertex,
   VertexShape? shape,
+);
+
+/// @en: The getter of the edge text style.
+///
+/// @zh: 边文字样式获取器
+typedef EdgeTextStyleGetter = TextStyle Function(
+  Edge vertex,
+  EdgeShape? shape,
 );
 
 typedef GraphComponentBuilder = Widget Function({
@@ -46,10 +58,23 @@ typedef GraphComponentBuilder = Widget Function({
 
 typedef OnScaleStart = void Function(ScaleStartDetails);
 typedef OnScaleUpdate = void Function(ScaleUpdateDetails);
+typedef OnScaleEnd = void Function(ScaleEndDetails);
+typedef OnTapDown = void Function(TapDownDetails);
+typedef OnTapUp = void Function(TapUpDetails);
 typedef OnPointerSignal = void Function(PointerSignalEvent);
 typedef OnPointerUp = void Function(PointerUpEvent);
 typedef OnPointerDown = void Function(PointerDownEvent);
 typedef OnPointerHover = void Function(PointerHoverEvent);
+
+/// @en: When the solid of the vertex is true, color rendering settings can be made.
+///
+/// @zh: 当节点的 solid 为 true 时，可进行显色设置
+typedef VertexSolidSetter = Paint Function(Vertex, Paint);
+
+/// @en: When the solid of the edge is true, color rendering settings can be made.
+///
+/// @zh: 当边的 solid 为 true 时，可进行显色设置
+typedef EdgeSolidSetter = Paint Function(Edge, Paint);
 
 /// The core api for Graph Options.
 ///
@@ -74,10 +99,24 @@ class Options {
   /// 给点设置形状
   VertexShape vertexShape = VertexCircleShape();
 
+  /// Provide a solid setter for vertex,
+  /// when the solid of the vertex is true, it is called
+  ///
+  /// 提供一个节点的 solid 设置器，
+  /// 在节点的 solid 为 true 时被调用
+  VertexSolidSetter? vertexSolidSetter;
+
   /// set shape strategy for components of edge.
   ///
   /// 给边设置形状
   EdgeShape edgeShape = EdgeLineShape();
+
+  /// Provide a solid setter for vertex.
+  /// when the solid of the edge is true, it is called
+  ///
+  /// 提供一个节点的 solid 设置器
+  /// 在边的 solid 为 true 时被调用
+  EdgeSolidSetter? edgeSolidSetter;
 
   /// use for create background widget.
   ///
@@ -122,6 +161,11 @@ class Options {
   ///
   /// @zh: 顶点文字获取器
   String Function(Vertex) textGetter = (Vertex vertex) => '${vertex.id}';
+
+  /// @en: the text getter of vertex.
+  ///
+  /// @zh: 顶点文字获取器
+  String Function(Edge) edgeTextGetter = (Edge edge) => '${edge.ranking}';
 
   /// @en: the url getter of vertex image.
   ///
@@ -188,7 +232,7 @@ class Options {
 
   late Graph graph;
 
-  run() {
+  void run() {
     if (graph.vertexes.isEmpty) return;
     var g = currantBatchRange();
     var vertexs = graph.vertexes.sublist(g[0], g[1]);
@@ -198,11 +242,15 @@ class Options {
     batchIndex++;
   }
 
-  /// onPointerHover
+  PointerDeviceKind? _firstPointerDeviceKind;
+  get firstPointerDeviceKind => _firstPointerDeviceKind;
+
   OnPointerHover? _onPointerHover;
   OnPointerHover get onPointerHover =>
       _onPointerHover ??
       (PointerHoverEvent details) {
+        _firstPointerDeviceKind ??= details.kind;
+
         pointer.x = details.localPosition.dx;
         pointer.y = details.localPosition.dy;
       };
@@ -246,6 +294,27 @@ class Options {
       };
   set onPointerSignal(OnPointerSignal? v) => _onPointerSignal = v;
 
+  OnTapDown? _onTapDown;
+  OnTapDown get onTapDown =>
+      _onTapDown ??
+      (details) {
+        pointer.x = details.localPosition.dx;
+        pointer.y = details.localPosition.dy;
+      };
+
+  set onTapDown(OnTapDown? v) => _onTapDown = v;
+
+  OnTapUp? _onTapUp;
+  OnTapUp get onTapUp =>
+      _onTapUp ??
+      (details) {
+        if (graph.hoverVertex != null &&
+            panDelta.length < graph.hoverVertex!.radius &&
+            _firstPointerDeviceKind == null) {
+          onVertexTapUp?.call(graph.hoverVertex!, null);
+        }
+      };
+
   /// onScaleStart
   OnScaleStart? _onScaleStart;
   OnScaleStart get onScaleStart =>
@@ -260,30 +329,74 @@ class Options {
 
   /// onScaleUpdate
   OnScaleUpdate? _onScaleUpdate;
+
   OnScaleUpdate get onScaleUpdate =>
       _onScaleUpdate ??
       (ScaleUpdateDetails details) {
-        if (details.pointerCount == 2 && details.scale != 1.0) {
-          var oz = scale.value;
-          scale.value = scaleVal * details.scale;
-          var nz = scale.value;
-          keepCenter(oz, nz, size.value, pointer.toOffset(), offset);
-        } else {
-          var delta = details.focalPointDelta;
-          pointer.x += delta.dx;
-          pointer.y += delta.dy;
-          var ifBreak = vertexShape.onDrag(delta.toVector2());
-          if (ifBreak) return;
-          if (graph.hoverVertex == null) {
-            offset.value += delta;
-          } else {
-            var dragDetail = delta.toVector2() / scale.value;
-            panDelta.add(dragDetail);
-            graph.algorithm?.onDrag(graph.hoverVertex, delta.toVector2());
+        if (details.pointerCount > 1) {
+          final double oldScale = scale.value;
+          final double k = 1 / (1 + oldScale * 0.2);
+          final double newScale = scaleVal * (1 + (details.scale - 1) * k);
+
+          void g(local) =>
+              keepCenter(oldScale, newScale, size.value, local, offset);
+
+          if (newScale >= scaleRange.x && newScale <= scaleRange.y) {
+            scale.value = newScale;
+
+            // if have a mause pointer, only zoom
+            if (_firstPointerDeviceKind != null) {
+              g(pointer.toOffset());
+              return;
+            }
+
+            g(details.localFocalPoint);
           }
         }
+
+        var delta = details.focalPointDelta;
+
+        pointer.x += delta.dx;
+        pointer.y += delta.dy;
+
+        var ifBreak = vertexShape.onDrag(delta.toVector2());
+
+        if (ifBreak) return;
+
+        if (graph.hoverVertex == null) {
+          offset.value += delta;
+
+          return;
+        }
+
+        var dragDetail = delta.toVector2() / scale.value;
+        panDelta.add(dragDetail);
+        graph.algorithm?.onDrag(graph.hoverVertex, delta.toVector2());
       };
+
   set onScaleUpdate(OnScaleUpdate? v) => _onScaleUpdate = v;
+
+  /// onScaleEnd
+  OnScaleEnd? _onScaleEnd;
+
+  OnScaleEnd get onScaleEnd =>
+      _onScaleEnd ??
+      (ScaleEndDetails details) {
+        hoverable = true;
+        graph.hoverVertex = null;
+
+        // fix: after vertex be drag, `onVertexTapUp` can not be triggle again.
+        // Due to `onTapUp` determining the length of panDelta,
+        // the temporary value `panDelta` needs to be rolled back to a state of 0
+        panDelta.xy = Vector2.zero();
+
+        // reset pointer in non-mouse mode for it dosen't hover vertex again
+        if (firstPointerDeviceKind == null) {
+          pointer.xy = Vector2.all((2 << 16) + 0.0);
+        }
+      };
+
+  set onScaleEnd(OnScaleEnd? v) => _onScaleEnd = v;
 
   // ---------------------------------------------------------------------------
 
@@ -382,7 +495,7 @@ class Options {
   /// @en: Merge the graph data.
   ///
   /// @zh: 合并图数据
-  void mergeGraph(graphData, {bool manual = true}) {
+  void mergeGraph(dynamic graphData, {bool manual = true}) {
     if (manual) graph.algorithm?.beforeMerge(graphData);
     graph.convertor?.convertGraph(graphData, graph: graph);
   }
@@ -390,7 +503,7 @@ class Options {
   /// @en: Refresh graph data.
   ///
   /// @zh: 刷新图数据
-  void refreshData(data) {
+  void refreshData(dynamic data) {
     graph.clear();
     graph.data = data;
     graph.convertor?.convertGraph(data, graph: graph);
@@ -407,7 +520,7 @@ class Options {
   /// @en: Set default colors for different labels.
   ///
   /// @zh: 为不同标签设置默认颜色
-  setDefaultVertexColor() {
+  void setDefaultVertexColor() {
     var tagColorByIndex = graphStyle.tagColorByIndex;
     var needCount = graph.allTags.length - tagColorByIndex.length;
     for (var i = tagColorByIndex.length; i < needCount; i++) {

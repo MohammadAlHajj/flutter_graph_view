@@ -1,16 +1,19 @@
 
-import '../../../extension/base_ext.dart';
+import 'package:flutter_graph_view/core/graph_algorithm.dart';
 
 /// A [ForceDecorator] that can be added to [ParallelizationDecorator]
 abstract interface class ParallelizableDecorator{
   /// The equivalent of a [GraphAlgorithm.compute] that
   // ComputeRes computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph);
 
+  /// see [GraphAlgorithm.serialize]
   Map<String,dynamic> serialize({Map<String, dynamic> params = const {}});
   /// The Isolate Function Name used so that isolates work as Javascript workers
+  /// look into isolate_manager package for more details
   String get isolateFuncWorkerName;
   /// A pointer to a static function inside the inheriting class that is
-  /// responsible for the isolate a sample is as follows:
+  /// responsible for the isolate. The parallelization entrypoint,
+  /// deserialization, and calculations live here. A sample is as follows:
   ///
   /// ```dart
   ///  @override

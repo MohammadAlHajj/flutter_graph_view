@@ -4,7 +4,7 @@
 
 import 'package:flutter_graph_view/flutter_graph_view.dart';
 
-/// todo: Rename this to something that makes more sense like PinDraggedDecorator
+/// TODO: Rename this to something that makes more sense like PinDraggedDecorator
 /// Pin the points that have been dragged in the fixed graph, preventing them from moving
 ///
 /// 固定图中被拖拽过的点，防止其移动的装饰器

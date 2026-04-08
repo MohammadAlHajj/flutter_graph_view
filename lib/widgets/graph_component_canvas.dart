@@ -36,23 +36,29 @@ class _GraphComponentCanvasState extends State<GraphComponentCanvas>
   dynamic get data => widget.data;
   DataConvertor get convertor => widget.convertor;
   Options get options => widget.options;
+  GraphPainter? graphPainter;
+
 
   ValueNotifier<double> get scale => options.scale;
   ValueNotifier<Offset> get offset => options.offset;
   ValueNotifier<int> timestamp = ValueNotifier(0);
 
-  update() {
+  void update() {
     timestamp.value = DateTime.now().millisecondsSinceEpoch;
   }
 
-  playOrPause() {
+  void playOrPause() {
     if (options.pause.value) _controller.stop();
     if (!options.pause.value) _controller.repeat();
   }
 
-  run() {
+  void run() {
     options.run();
-    if (mounted) setState(() {});
+    update();
+    if (mounted) {
+      setState(() {
+      });
+    }
   }
 
   @override
@@ -76,6 +82,8 @@ class _GraphComponentCanvasState extends State<GraphComponentCanvas>
     options.pause.addListener(playOrPause);
     offset.addListener(update);
     scale.addListener(update);
+
+    graphPainter = GraphPainter(graph, timestamp);
   }
 
   @override
@@ -101,7 +109,7 @@ class _GraphComponentCanvasState extends State<GraphComponentCanvas>
                 child: Transform.scale(
                   scale: scale.value,
                   child: CustomPaint(
-                    painter: GraphPainter(graph),
+                    painter: graphPainter,
                     size: Size.infinite,
                   ),
                 ),
@@ -110,22 +118,21 @@ class _GraphComponentCanvasState extends State<GraphComponentCanvas>
           ),
         ),
         Positioned.fill(
-            child: Listener(
-          behavior: HitTestBehavior.translucent,
-          onPointerHover: options.onPointerHover,
-          onPointerUp: options.onPointerUp,
-          onPointerSignal: options.onPointerSignal,
-          onPointerDown: options.onPointerDown,
-        )),
-        Positioned.fill(
           child: GestureDetector(
             // 为了不让在拖动画面的过程中，触碰到点，变成拖动节点
             onScaleStart: options.onScaleStart,
             onScaleUpdate: options.onScaleUpdate,
-            onScaleEnd: (d) {
-              options.hoverable = true;
-            },
+            onScaleEnd: options.onScaleEnd,
+            onTapDown: options.onTapDown,
+            onTapUp: options.onTapUp,
             behavior: HitTestBehavior.translucent,
+            child: Listener(
+              behavior: HitTestBehavior.translucent,
+              onPointerHover: options.onPointerHover,
+              onPointerUp: options.onPointerUp,
+              onPointerSignal: options.onPointerSignal,
+              onPointerDown: options.onPointerDown,
+            ),
           ),
         ),
         verticalController,

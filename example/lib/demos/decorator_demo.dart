@@ -57,7 +57,7 @@ class DecoratorDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     var vertexes = <Map>{};
     var r = Random();
-    var len = 50;
+    var len = 500;
     for (var i = 0; i < len; i++) {
       var t = r.nextInt(9);
       vertexes.add(
@@ -96,7 +96,7 @@ class DecoratorDemo extends StatelessWidget {
       convertor: MapConvertor(),
       options: Options()
         ..onVertexTapUp = ((vertex, event) {
-          vertex.g?.mergeGraph(genData(vertex.id));
+          vertex.g?.mergeGraph?.call(genData(vertex.id));
         })
         ..enableHit = false
         ..panelDelay = const Duration(milliseconds: 500)
@@ -118,7 +118,12 @@ class DecoratorDemo extends StatelessWidget {
         ..imgUrlGetter = imgUrlGetter
         ..edgePanelBuilder = edgePanelBuilder
         ..vertexPanelBuilder = vertexPanelBuilder
+        // ..painter = GraphGlPainter.new
+        ..edgeTextGetter = (e) {
+          return '${e.ranking}';
+        }
         ..edgeShape = EdgeLineShape(
+          textRenderer: EdgeTextRendererImpl(),
           decorators: [
             SolidArrowEdgeDecorator(),
           ],
@@ -176,7 +181,7 @@ class DecoratorDemo extends StatelessWidget {
     );
   }
 
-  genData(srcId) {
+  Map<String, Set<Map>> genData(dynamic srcId) {
     var vertexes = <Map>{};
     var edges = <Map>{};
     var r = Random();

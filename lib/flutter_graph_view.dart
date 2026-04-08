@@ -2,7 +2,7 @@
 //
 // This source code is licensed under Apache 2.0 License.
 
-library flutter_graph_view;
+library;
 
 /// data models
 export './model/graph.dart';
@@ -25,7 +25,9 @@ export 'core/options/shape/vertex_shape.dart';
 export 'core/options/shape/vertex/vertex_decorator.dart';
 export 'core/options/shape/edge_shape.dart';
 export 'core/options/shape/edge/edge_decorator.dart';
+export 'core/options/text/text_renderer.dart';
 export 'core/options/text/vertex_text_renderer.dart';
+export 'core/options/text/edge_text_renderer.dart';
 
 /// interfaces' default impl
 export 'core/algorithm/random_algorithm.dart';
@@ -37,6 +39,7 @@ export 'core/algorithm/circle_layout.dart';
 export 'core/algorithm/decorator/force_decorator.dart';
 export 'core/algorithm/decorator/pin_center_decorator.dart';
 export 'core/algorithm/decorator/force_motion_decorator.dart';
+export 'core/algorithm/decorator/damped_force_motion_decorator.dart';
 export 'core/algorithm/decorator/hooke_decorator.dart';
 export 'core/algorithm/decorator/hooke_border_decorator.dart';
 export 'core/algorithm/decorator/hooke_center_decorator.dart';
@@ -46,15 +49,20 @@ export 'core/algorithm/decorator/coulomb_center_decorator.dart';
 export 'core/algorithm/decorator/coulomb_border_decorator.dart';
 export 'core/algorithm/decorator/time_counter_decorator.dart';
 export 'core/algorithm/decorator/persistence_decorator.dart';
+export 'core/algorithm/decorator/pin_to_center_decorator.dart';
 export 'core/algorithm/decorator/pin_decorator.dart';
 export 'core/algorithm/decorator/pause_decorator.dart';
 export 'core/algorithm/decorator/graph_route_decorator.dart';
 export 'core/algorithm/decorator/legend_decorator.dart';
 export 'core/algorithm/decorator/counter_decorator.dart';
+export 'core/algorithm/decorator/barnes_hut_coulomb_decorator.dart';
 
 export 'core/options/shape/vertex/vertex_circle_shape.dart';
+export 'core/options/shape/vertex/vertex_diamond_shape.dart';
 export 'core/options/shape/edge/edge_line_shape.dart';
+export 'core/options/shape/edge/edge_line_shape_variable_opacity.dart';
 export 'core/options/text/vertex_text_renderer_impl.dart';
+export 'core/options/text/edge_text_renderer_impl.dart';
 
 /// default overlay builders
 export 'core/dashboard/k_default_overlay_builder.dart';

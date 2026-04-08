@@ -24,6 +24,8 @@ class MapConvertor extends DataConvertor<Map, Map> {
     vertex.tag = v['tag'];
     vertex.tags = v['tags'];
     vertex.data = v['data'];
+    vertex.solid = v['solid'] ?? vertex.solid;
+    vertex.radiusScale = v['scale'] ?? vertex.radiusScale;
     vertex.force = Vector2.zero();
     vertex.velocity = Vector2.zero();
     return vertex;
@@ -43,6 +45,7 @@ class MapConvertor extends DataConvertor<Map, Map> {
     Edge result = Edge();
     result.ranking = e['ranking'];
     result.edgeName = e['edgeName'];
+    result.solid = e['solid'] ?? result.solid;
 
     result.start = g.keyCache[e['srcId']]!;
     result.end = g.keyCache[e['dstId']];

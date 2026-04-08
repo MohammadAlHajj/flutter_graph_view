@@ -18,9 +18,6 @@ class HookeDecorator extends ForceDecorator implements ParallelizableDecorator  
   double k;
   double Function(double length, int degree)? degreeFactor;
 
-
-
-
   @override
   Widget Function()? get verticalOverlay =>
       handleOverlay != null ? () => handleOverlay!(this) : null;
@@ -35,6 +32,13 @@ class HookeDecorator extends ForceDecorator implements ParallelizableDecorator  
     this.degreeFactor,
   });
 
+  Vector2 hooke(Vertex s, Vertex d, Graph graph) {
+    var len = degreeFactor?.call(length, d.neighborEdges.length) ?? length;
+    var delta = s.position - d.position;
+    var distance = delta.length;
+    var force = -(distance - len - log(s.degree + d.degree)) * k;
+    return delta * force;
+  }
 
   @override
   // ignore: must_call_super
@@ -46,39 +50,6 @@ class HookeDecorator extends ForceDecorator implements ParallelizableDecorator  
       }
     }
   }
-
-  Vector2 hooke(Vertex s, Vertex d, Graph graph) {
-    var len = degreeFactor?.call(length, d.neighborEdges.length) ?? length;
-    var delta = s.position - d.position;
-    var distance = delta.length;
-    var force = -(distance - len - log(s.degree + d.degree)) * k;
-    return delta * force;
-  }
-
-  // @override
-  // ComputeRes computeRaw(List<Map<String, dynamic>> vertexList, Map<String, dynamic> graph) {
-  //   final perVertexCalcMap = ComputeRes();
-  //   // for (final v in vertexList) {
-  //   //   perVertexCalcMap[v["id"] as String] = Vector2.zero();
-  //   // }
-  //
-  //   for (final v in vertexList) {
-  //     for (var n in v["neighbors"]) {
-  //       if (v["position"] != Vector2.zero() && n["position"] != Vector2.zero()) {
-  //         var hookRes = hookeRaw(v, n, graph);
-  //         perVertexCalcMap[v["id"]] = hookRes;
-  //         perVertexCalcMap[n["id"]] = -hookRes;
-  //       }
-  //     }
-  //   }
-  //   final childForces = super.computeRaw(vertexList, graph);
-  //   for (final keys in perVertexCalcMap.keys){
-  //     childForces[keys] = childForces.containsKey(keys)
-  //       ? childForces[keys] + perVertexCalcMap[keys]!
-  //       : perVertexCalcMap[keys]!;
-  //   }
-  //   return perVertexCalcMap;
-  // }
 
 
   @override
@@ -95,50 +66,51 @@ class HookeDecorator extends ForceDecorator implements ParallelizableDecorator  
       onEvent: (controller, jsonInput) {
         final perVertexCalcMap = ComputeRes();
 
+        // extract parameters from json input
         double k = jsonInput["decorator"]["params"]["k"];
         double length = jsonInput["decorator"]["params"]["length"];
         Map<String, Map<String, dynamic>> vertexMap = jsonInput["graph"]["vertexes"];
         List<Map<String, dynamic>> vertexes = vertexMap.values.toList();
 
+        // initialize per vertex map with 0 forces
         for (final v in vertexes) {
           perVertexCalcMap[v["id"]] = Vector2.zero();
         }
 
+        // compute forces
         for (final v in vertexes) {
           for (var nId in v["neighbors"]) {
             Map<String, dynamic> n = vertexMap[nId]!;
             if (v["position"] != Vector2.zero()
                 && n["position"] != Vector2.zero()
+                && v["id"] != n["id"]
             ) {
               var hookRes = hookeRaw(v, n, length, k);
-              double degree = max(v["degree"] -1, 1) * 1.0;
-              // perVertexCalcMap[v["id"]] += hookRes * log(degree) / degree*1.0;
-              perVertexCalcMap[v["id"]] += hookRes; //* log(degree) / (log(vertexes.length)*10.0);
-              // perVertexCalcMap[v["id"]] += hookRes / log(vertexes.length);
+              // final vDeg = max(v["degree"], 2.0);
+              final vDeg = max(v["degree"], 1.0);
+              // final nDeg = max(n["degree"], 1.0);
+              // perVertexCalcMap[v["id"]] += hookRes/(vertexes.length*1.0); // bad...weak
+              // perVertexCalcMap[v["id"]] += hookRes/sqrt(vertexes.length*1.0); // bad...weak
+              // perVertexCalcMap[v["id"]] += hookRes/(vDeg * log(vDeg)); // bad...weak
+              // perVertexCalcMap[v["id"]] += hookRes/(vDeg * sqrt(vertexes.length)); // fine
+              perVertexCalcMap[v["id"]] += hookRes/(vDeg * log(vertexes.length)); // fine
+              // perVertexCalcMap[v["id"]] += hookRes/(vDeg); // fine
+              // perVertexCalcMap[v["id"]] += hookRes/log(vDeg*vertexes.length); // bad...strong
+              // perVertexCalcMap[v["id"]] += hookRes/(log(vertexes.length)); // bad...strong
+              // perVertexCalcMap[v["id"]] += hookRes/(log(vDeg * vDeg)); //bad...strong
+              // perVertexCalcMap[v["id"]] += hookRes;
             }
           }
         }
 
         return perVertexCalcMap;
-
-        // controller.sendResult(
-        // return rootDec.computeRaw(jsonInput["graph"]);
-        // );
-        // // Send the final result
       },
-      // onInit: (controller) {
-      //   print('Custom Fibonacci Worker: Initialized');
-      //   // Perform any setup logic here
-      // },
-      // onDispose: (controller) {
-      //   print('Custom Fibonacci Worker: Disposed');
-      //   // Perform any cleanup logic here
-      // },
       autoHandleException: true, // Set to true to let IsolateManager handle basic errors
       autoHandleResult: true,    // Set to true to let IsolateManager handle basic result sending
     );
   }
 
+  /// compute hooke force between two vertices
   static Vector2 hookeRaw(
       Map<String, dynamic> s,
       Map<String, dynamic> d,
@@ -148,8 +120,7 @@ class HookeDecorator extends ForceDecorator implements ParallelizableDecorator  
     var len = length;
     var delta = s["position"] - d["position"];
     var distance = delta.length;
-    var force = -(distance - len + log(s["degree"] + d["degree"])) * k;
-    // var force = -(distance - len ) * k;
+    var force = -(distance - len - log(s["degree"] + d["degree"])) * k;
     return delta * force;
   }
 

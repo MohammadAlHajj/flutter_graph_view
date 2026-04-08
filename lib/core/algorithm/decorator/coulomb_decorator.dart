@@ -8,7 +8,8 @@ import 'package:flutter_graph_view/core/algorithm/decorator/parallelizable_decor
 import 'package:flutter_graph_view/flutter_graph_view.dart';
 import 'package:isolate_manager/isolate_manager.dart';
 
-/// Decorators in which all nodes in the figure form repulsive interactions with each other.
+/// Decorators in which all nodes in the figure form repulsive interactions with
+/// each other. The Radius of the node determines the strength of the repulsion.
 ///
 /// 图中所有节点相互间形成排斥的装饰器（库仑力）
 class CoulombDecorator extends ForceDecorator implements ParallelizableDecorator {
@@ -56,15 +57,20 @@ class CoulombDecorator extends ForceDecorator implements ParallelizableDecorator
       onEvent: (controller, jsonInput) {
         final perVertexCalcMap = ComputeRes();
 
+        // extract parameters from json input
         double k = jsonInput["decorator"]["params"]["k"];
         Map<String, Map<String, dynamic>> vertexMap = jsonInput["graph"]["vertexes"];
         List<Map<String, dynamic>> vertexes = vertexMap.values.toList();
 
+        // initialize per vertex map with 0 forces
         for (var v in vertexes) {
           perVertexCalcMap[v["id"]] = Vector2.zero();
         }
 
+
         for (int i = 0; i < vertexes.length; i++) {
+          // starting from i+1 to avoid double counting. make the algorithm
+          // twice as fast
           for (int j = i+1; j < vertexes.length; j++) {
             final v = vertexes[i];
             final gv = vertexes[j];
@@ -78,36 +84,27 @@ class CoulombDecorator extends ForceDecorator implements ParallelizableDecorator
               // F = k * q1 * q2 / r^2
               final delta = vPos - gvPos;
               final distance = delta.length;
-              // final vDeg = max(v["degree"]-1, 1.0);
-              final vDeg = max(v["radius"]-1, 1.0);
-              // final vGDeg = max(gv["degree"]-1, 1.0);
-              final vGDeg = max(gv["radius"]-1, 1.0);
-              final force = k * vDeg * vGDeg / max((distance * distance), 1);
-              // final force = k / max((distance * distance), 1);
+              final vRad = v["radius"];
+              final vGRad = gv["radius"];
+              final force = (k * vRad * vGRad) / max((distance * distance * log(vertexes.length)), 1.0);
 
               perVertexCalcMap[v["id"]] += delta * force;
-              // perVertexCalcMap[v["id"]] += delta * force * vDeg;
               perVertexCalcMap[gv["id"]] += -delta * force;
-              // perVertexCalcMap[gv["id"]] += -delta * force * vGDeg;
+
+              // possible other calculation ???? It might help with stability by
+              // limiting the force scaling to the "other"'s radius/degree.
+              // final vDeg = max(v["degree"]-1, 1.0);
+              // final vGDeg = max(gv["degree"]-1, 1.0);
+              // final force = k / max((distance * distance), 1);
+              // perVertexCalcMap[v["id"]] += delta * force * vGDeg;
+              // perVertexCalcMap[gv["id"]] += -delta * force * vDeg;
             }
           }
         }
         return perVertexCalcMap;
       },
-      // onInit: (controller) {
-      //   print('Custom Fibonacci Worker: Initialized');
-      //   // Perform any setup logic here
-      // },
-      // onDispose: (controller) {
-      //   print('Custom Fibonacci Worker: Disposed');
-      //   // Perform any cleanup logic here
-      // },
       autoHandleException: true, // Set to true to let IsolateManager handle basic errors
       autoHandleResult: true,    // Set to true to let IsolateManager handle basic result sending
     );
   }
-
-
-
-
 }

@@ -117,7 +117,8 @@ class ErGraphConstantsShape extends EdgeShape with DashPainter {
     canvas.drawPath(path, paint);
     edge.path = path;
     decorators?.forEach((decorator) {
-      decorator.decorate(edge, canvas, paint, edge.length, 1);
+      // decorator.decorate(edge, canvas, paint, edge.length, 1);
+      decorator.decorate(edge, canvas, paint);
     });
   }
 

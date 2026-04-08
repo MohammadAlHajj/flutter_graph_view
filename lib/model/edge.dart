@@ -2,15 +2,20 @@
 //
 // This source code is licensed under Apache 2.0 License.
 
+import 'dart:typed_data';
+import 'package:flutter/rendering.dart' as r;
 import 'dart:ui';
 
 import 'package:flutter_graph_view/core/util.dart';
 import 'package:flutter_graph_view/flutter_graph_view.dart';
+import 'package:flutter_graph_view/model/edge_render.dart';
 
 /// Data model of edge component.
 ///
 /// 关系【边】组件的数据模型
 class Edge {
+  late final EdgeRender edgeRender;
+
   /// The key for edge.
   ///
   /// 关系键
@@ -31,6 +36,8 @@ class Edge {
   /// 对当前关系的起始节点进行缓存
   late Vertex start;
 
+  bool solid = false;
+
   /// Cache the destination vertex.
   ///
   /// 对当前关系的终止节点进行缓存
@@ -47,6 +54,10 @@ class Edge {
   bool isHovered = false;
 
   bool visible = true;
+
+  Edge(){
+    edgeRender = EdgeRender(this);
+  }
 
   Graph? g;
   Vector2 get size => g!.options!.edgeShape.size(this);
@@ -124,5 +135,15 @@ class Edge {
 
   double get length {
     return g?.options?.edgeShape.len(this) ?? 0;
+  }
+
+  Float64List edgeCenter() {
+    late r.Matrix4 matrix4;
+    if (g?.options?.edgeShape == null) {
+      matrix4 = r.Matrix4.zero();
+    } else {
+      matrix4 = g!.options!.edgeShape.edgeCenter(this);
+    }
+    return Float64List.fromList(matrix4.storage.toList());
   }
 }

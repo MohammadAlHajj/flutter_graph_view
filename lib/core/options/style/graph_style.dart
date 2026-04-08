@@ -2,7 +2,8 @@
 //
 // This source code is licensed under Apache 2.0 License.
 
-import 'dart:ui';
+import 'dart:ui' hide TextStyle;
+import 'package:flutter/painting.dart';
 import 'dart:math' as math;
 
 import 'package:flutter_graph_view/flutter_graph_view.dart';
@@ -96,6 +97,9 @@ class GraphStyle {
   /// @zh: 顶点悬停时，非激活点边的透明度
   double hoverOpacity = 0.3;
 
+  /// @en: the not-weak edge opacity. see [EdgeShape.isWeaken].
+  double edgeStrongOpacity = 1.0;
+
   /// @en: the text style of vertex.
   /// now is only supports:
   /// - `fontSize`
@@ -108,4 +112,17 @@ class GraphStyle {
   /// - `fontWeight`
   /// - `fontColor`
   VertexTextStyleGetter? vertexTextStyleGetter;
+
+  /// @en: the text style of edge.
+  /// now is only supports:
+  /// - `fontSize`
+  /// - `fontWeight`
+  /// - `fontColor`
+  ///
+  /// @zh: 顶点文字样式
+  /// 目前仅支持：
+  /// - `fontSize`
+  /// - `fontWeight`
+  /// - `fontColor`
+  EdgeTextStyleGetter? edgeTextStyleGetter;
 }

@@ -1,3 +1,54 @@
+## 2.1.1
+
+- fix: issues with the gesture handling (mobile end).
+    > 修复移动端手势处理的问题
+- feat: add onScaleEnd, vertexSolidSetter and edgeSolidSetter to `options`.
+    > 为`opitons`新增 onScaleEnd、vertexSolidSetter 跟 edgeSolidSetter。
+
+### Dev habit change
+
+- (Compared to 2.1.0) Edge.solid and Vertex.solid default to true, now changed to false, to maintain the habits before 2.1.0.
+    > （与 2.1.0 相比）Edge.solid 跟 Vertex.solid 默认为 true，为了保持与 2.1.0 之前版本的习惯，现在修改成默认false。
+
+## 2.1.0
+
+- **doc: the first complete documentation for using the markdown format. Contributed by [@NoachDev](https://github.com/NoachDev) [#31](https://github.com/graph-cn/flutter_graph_view/pull/31)**
+    > 首份完整的markdown格式的使用文档
+
+- 4 feats contributed by [@NoachDev](https://github.com/NoachDev) [#31](https://github.com/graph-cn/flutter_graph_view/pull/31)
+    - A new vertex shape for the graph: `VertexDiamondShape`([8f42cca](https://github.com/graph-cn/flutter_graph_view/pull/31/commits/8f42cca98fb6eb5dd7791fcaea105e69de9c31f7))
+    - Individually scalable vertex sizes
+    - Solid colors
+    - Scalable loop arc edges
+
+- 1 fix and 1 feat contributed by [@sealoyal](https://github.com/sealoyal2018) [#30](https://github.com/graph-cn/flutter_graph_view/pull/30)
+    - fix: edge self connection cannot apply edge decorator.
+        > 边自连接无法应用边装饰器
+    - feat: a new edge decorator for label support.
+        > 新增边标签显示装饰器
+        ```dart
+        options
+            ..edgeShape = EdgeLineShape(
+                decorators: [
+                    LabelEdgeDecorator(),
+                ],
+            )
+        ```
+
+- feat: support obtaining the center position of edges.
+- feat: support for setting the edge text renderer.
+    > 支持设置边的文本内容及渲染器
+    ```dart
+    options
+        ..edgeTextGetter = (e) {// default to e.ranking
+          return '${e.ranking}';
+        }
+        ..edgeShape = EdgeLineShape(
+          textRenderer: EdgeTextRendererImpl(),
+        )
+    ```
+
+
 ## 2.0.2+1
 
 - fix: the issue of incorrect rendering when calling `setState` from the outside

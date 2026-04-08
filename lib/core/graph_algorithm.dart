@@ -7,7 +7,6 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_graph_view/flutter_graph_view.dart';
 
-
 ///
 /// Interface: point assignment algorithm of graph.
 /// 接口：图的点位赋值算法
@@ -94,7 +93,7 @@ abstract class GraphAlgorithm {
     ];
   }
 
-  setGlobalData({
+  void setGlobalData({
     required GraphAlgorithm rootAlg,
     required Graph graph,
   }) {
@@ -139,7 +138,7 @@ abstract class GraphAlgorithm {
   }
 
   @mustCallSuper
-  void beforeLoad(data) {
+  void beforeLoad(dynamic data) {
     for (GraphAlgorithm decorator in decorators ?? []) {
       decorator.beforeLoad(data);
     }
